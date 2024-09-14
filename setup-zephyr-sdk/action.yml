@@ -1,0 +1,48 @@
+name: Set up Zephyr SDK
+description: |
+  Installs the Zephyr SDK to runner environment.
+
+  For more information, see: https://github.com/zephyrproject-rtos/sdk-ng/releases/latest
+
+inputs:
+  # TODO: Support latest? Need to dynamically derive latest version to work
+  version:
+    description: Release version of the Zephyr SDK
+    required: true
+  # TODO: Handle delimiters
+  toolchains:
+    description: Selected toolchains to be installed
+    default: all
+
+runs:
+  using: "composite"
+
+  steps:
+    # TODO: Validate arguments
+    - name: Restore Zephyr SDK Cache
+      id: cache-zephyr-sdk
+      uses: actions/cache@v4.0.2
+      with:
+        # TODO: Hash toolchains probably?
+        key: zephyr-sdk-${{ runner.os }}-${{ inputs.version }}-${{ inputs.toolchains }}
+        path: |
+          ~/zephyr-sdk-${{ inputs.version }}
+          ~/.cmake/packages/Zephyr-sdk
+
+    - name: Download Zephyr SDK
+      if: ${{ steps.cache-zephyr-sdk.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: |
+        curl -fsSLO "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${{ inputs.version }}/zephyr-sdk-${{ inputs.version }}_linux-x86_64.tar.xz"
+        curl -fsSLO "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${{ inputs.version }}/sha256.sum"
+        sha256sum --check --ignore-missing < sha256.sum
+        tar xvf "zephyr-sdk-${{ inputs.version }}_linux-x86_64.tar.xz"
+        mv "zephyr-sdk-${{ inputs.version }}" "${HOME}"
+        rm "zephyr-sdk-${{ inputs.version }}_linux-x86_64.tar.xz"
+        rm sha256.sum
+
+    - name: Install Zephyr SDK
+      if: ${{ steps.cache-zephyr-sdk.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: |
+        "${HOME}/zephyr-sdk-${{ inputs.version }}/setup.sh" -t "${{ inputs.toolchains }}"

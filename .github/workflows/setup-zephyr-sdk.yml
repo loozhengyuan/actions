@@ -1,0 +1,27 @@
+name: setup-zephyr-sdk
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4.1.7
+
+      - name: Run action
+        uses: ./setup-zephyr-sdk
+        with:
+          version: "0.16.5-1"
+          toolchains: arm-zephyr-eabi
