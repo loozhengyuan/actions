@@ -24,7 +24,6 @@ runs:
       shell: bash
       run: |
         apt-cache policy kicad
-        apt-cache madison kicad
         echo "latest=$(apt-cache policy kicad | awk '/Candidate:/ {print $2}')" >> "${GITHUB_OUTPUT}"
 
     - name: Install KiCad
