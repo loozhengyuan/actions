@@ -31,3 +31,11 @@ runs:
       run: |
         sudo apt-get install "kicad=${{ inputs.version || steps.kicad-version.outputs.latest }}"
         kicad-cli --version
+
+    # NOTE: Initial configuration for symbol and footprint libraries.
+    # https://docs.kicad.org/master/en/eeschema/eeschema.html#initial-configuration
+    # https://docs.kicad.org/master/en/pcbnew/pcbnew_footprints_and_libraries.html#initial_configuration
+    - name: Set up KiCad lib tables
+      shell: bash
+      run: |
+        cp /usr/share/kicad/template/*-lib-table ${HOME}/.config/kicad/$(kicad-cli -v | cut -d . -f 1,2)/
