@@ -1,7 +1,12 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      # NOTE: Workaround to fix issue where composite actions
+      # are not bumped automatically.
+      # https://github.com/dependabot/dependabot-core/issues/6704
+      - "/*/action.yml"
     schedule:
       interval: "weekly"
       day: "saturday"
