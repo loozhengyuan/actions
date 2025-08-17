@@ -4,9 +4,11 @@ updates:
     directories:
       - "/"
       # NOTE: Workaround to fix issue where composite actions
-      # are not bumped automatically.
+      # are not bumped automatically. Glob expression DOES NOT
+      # work so they have to be defined explicitly.
       # https://github.com/dependabot/dependabot-core/issues/6704
-      - "/*/action.yml"
+      - "/setup-kicad/action.yml"
+      - "/setup-zephyr-sdk/action.yml"
     schedule:
       interval: "weekly"
       day: "saturday"
