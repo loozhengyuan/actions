@@ -7,8 +7,8 @@ updates:
       # are not bumped automatically. Glob expression DOES NOT
       # work so they have to be defined explicitly.
       # https://github.com/dependabot/dependabot-core/issues/6704
-      - "/setup-kicad/action.yml"
-      - "/setup-zephyr-sdk/action.yml"
+      - "/setup-kicad"
+      - "/setup-zephyr-sdk"
     schedule:
       interval: "weekly"
       day: "saturday"
