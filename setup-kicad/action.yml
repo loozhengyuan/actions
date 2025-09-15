@@ -1,41 +1,163 @@
 name: Set up KiCad
 description: |
-  Installs KiCad to the runner environment.
+  Installs KiCad to the runner environment with support for exact versions.
+  Supports installing specific versions (e.g., 8.0.6) via AppImage downloads.
 
   For more information, see: https://www.kicad.org
 
 inputs:
-  # TODO: Not all versions are in the PPA, consider building from source!
   version:
-    description: Release version of KiCad to be installed
+    description: Release version of KiCad to be installed (e.g., 8.0.6, 8.0.5). If not specified, installs latest from PPA.
+    required: false
 
 runs:
   using: "composite"
 
   steps:
-    # TODO: Support other distros and OS?
-    - name: Add KiCad Ubuntu PPA
+    - name: Install exact KiCad version via AppImage
+      if: ${{ inputs.version }}
       shell: bash
       run: |
-        sudo add-apt-repository ppa:kicad/kicad-8.0-releases
+        set -e
+        
+        VERSION="${{ inputs.version }}"
+        echo "Installing KiCad version: $VERSION"
+        
+        # Validate version format (x.y.z)
+        if ! echo "$VERSION" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+          echo "Error: Version must be in x.y.z format (e.g., 8.0.6)"
+          exit 1
+        fi
+        
+        # Create installation directory
+        INSTALL_DIR="/opt/kicad-$VERSION"
+        sudo mkdir -p "$INSTALL_DIR"
+        
+        # Download AppImage
+        APPIMAGE_URL="https://downloads.kicad.org/kicad/${VERSION}/kicad-${VERSION}-x86_64.AppImage"
+        APPIMAGE_PATH="$INSTALL_DIR/kicad-${VERSION}.AppImage"
+        
+        echo "Downloading KiCad AppImage from: $APPIMAGE_URL"
+        
+        # Download with retry logic
+        for attempt in 1 2 3; do
+          if curl -L --fail -o "$APPIMAGE_PATH" "$APPIMAGE_URL"; then
+            echo "✓ Download successful on attempt $attempt"
+            break
+          else
+            echo "Download attempt $attempt failed"
+            if [ $attempt -eq 3 ]; then
+              echo "Error: Failed to download KiCad AppImage after 3 attempts"
+              echo "Please check if version $VERSION exists at: $APPIMAGE_URL"
+              exit 1
+            fi
+            sleep 2
+          fi
+        done
+        
+        # Verify download
+        if [ ! -f "$APPIMAGE_PATH" ] || [ ! -s "$APPIMAGE_PATH" ]; then
+          echo "Error: AppImage file is missing or empty"
+          exit 1
+        fi
+        
+        # Make AppImage executable
+        chmod +x "$APPIMAGE_PATH"
+        
+        # Create symlinks for KiCad binaries
+        sudo mkdir -p /usr/local/bin
+        
+        # Extract AppImage to access binaries
+        cd "$INSTALL_DIR"
+        "./$APPIMAGE_PATH" --appimage-extract > /dev/null 2>&1 || {
+          echo "Error: Failed to extract AppImage"
+          exit 1
+        }
+        
+        # Create symlinks for common KiCad executables
+        EXTRACTED_DIR="$INSTALL_DIR/squashfs-root"
+        if [ ! -d "$EXTRACTED_DIR/usr/bin" ]; then
+          echo "Error: Extracted AppImage structure is unexpected"
+          exit 1
+        fi
+        
+        for binary in kicad kicad-cli eeschema pcbnew; do
+          if [ -f "$EXTRACTED_DIR/usr/bin/$binary" ]; then
+            sudo ln -sf "$EXTRACTED_DIR/usr/bin/$binary" "/usr/local/bin/$binary"
+            echo "✓ Created symlink for $binary"
+          else
+            echo "Warning: Binary $binary not found in AppImage"
+          fi
+        done
+        
+        # Verify installation
+        if command -v kicad-cli >/dev/null 2>&1; then
+          kicad-cli --version
+          echo "✓ KiCad $VERSION installed successfully via AppImage"
+        else
+          echo "Error: kicad-cli not accessible after installation"
+          exit 1
+        fi
 
-    - name: Determine latest version
-      id: kicad-version
+    - name: Install KiCad from PPA (fallback)
+      if: ${{ !inputs.version }}
       shell: bash
       run: |
-        apt-cache policy kicad
-        echo "latest=$(apt-cache policy kicad | awk '/Candidate:/ {print $2}')" >> "${GITHUB_OUTPUT}"
-
-    - name: Install KiCad
-      shell: bash
-      run: |
-        sudo apt-get install "kicad=${{ inputs.version || steps.kicad-version.outputs.latest }}"
+        set -e
+        echo "No specific version requested, installing latest from PPA"
+        
+        # Add KiCad PPA
+        sudo add-apt-repository ppa:kicad/kicad-8.0-releases -y
+        sudo apt-get update
+        
+        # Install latest version
+        sudo apt-get install -y kicad
         kicad-cli --version
 
-    # NOTE: Initial configuration for symbol and footprint libraries.
-    # https://docs.kicad.org/master/en/eeschema/eeschema.html#initial-configuration
-    # https://docs.kicad.org/master/en/pcbnew/pcbnew_footprints_and_libraries.html#initial_configuration
-    - name: Set up KiCad lib tables
+    - name: Set up KiCad configuration directories
       shell: bash
       run: |
-        cp /usr/share/kicad/template/*-lib-table ${HOME}/.config/kicad/$(kicad-cli -v | cut -d . -f 1,2)/
+        set -e
+        
+        # Get KiCad version for config directory
+        if command -v kicad-cli >/dev/null 2>&1; then
+          KICAD_VERSION=$(kicad-cli -v 2>/dev/null | head -1 | cut -d . -f 1,2 || echo "8.0")
+        else
+          echo "Warning: kicad-cli not found, using default version 8.0"
+          KICAD_VERSION="8.0"
+        fi
+        
+        CONFIG_DIR="${HOME}/.config/kicad/${KICAD_VERSION}"
+        
+        echo "Setting up KiCad configuration in: $CONFIG_DIR"
+        mkdir -p "$CONFIG_DIR"
+        
+        # Find library table templates
+        TEMPLATE_DIRS=(
+          "/usr/share/kicad/template"
+          "/opt/kicad-${{ inputs.version }}/squashfs-root/usr/share/kicad/template"
+        )
+        
+        LIB_TABLES_COPIED=false
+        for template_dir in "${TEMPLATE_DIRS[@]}"; do
+          if [ -d "$template_dir" ] && [ "$(ls -A "$template_dir"/*-lib-table 2>/dev/null | wc -l)" -gt 0 ]; then
+            echo "Found library tables in: $template_dir"
+            cp "$template_dir"/*-lib-table "$CONFIG_DIR/" 2>/dev/null || true
+            LIB_TABLES_COPIED=true
+            break
+          fi
+        done
+        
+        if [ "$LIB_TABLES_COPIED" = true ]; then
+          echo "✓ Library tables copied successfully"
+        else
+          echo "Warning: No library tables found to copy"
+        fi
+        
+        # List what was configured
+        if [ -d "$CONFIG_DIR" ]; then
+          echo "Configuration files in $CONFIG_DIR:"
+          ls -la "$CONFIG_DIR/" 2>/dev/null || echo "  (empty directory)"
+        fi
+        
+        echo "✓ KiCad configuration setup completed"

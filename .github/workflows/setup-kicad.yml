@@ -8,16 +8,41 @@ on:
       - main
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
+  test-exact-version:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
+        version:
+          - "8.0.6"
+          - "8.0.5"
 
     steps:
       - name: Checkout branch
         uses: actions/checkout@v5.0.0
 
-      - name: Run action
+      - name: Run action with exact version
         uses: ./setup-kicad
+        with:
+          version: ${{ matrix.version }}
+
+      - name: Verify KiCad installation
+        run: |
+          kicad-cli --version
+          which kicad
+          which kicad-cli
+
+  test-ppa-fallback:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v5.0.0
+
+      - name: Run action without version (PPA fallback)
+        uses: ./setup-kicad
+
+      - name: Verify KiCad installation
+        run: |
+          kicad-cli --version
+          which kicad
+          which kicad-cli
