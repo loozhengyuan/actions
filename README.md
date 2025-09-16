@@ -48,7 +48,7 @@ steps:
 
 The action will:
 - Clone the KiCad Library Utils repository to `/opt/kicad-library-utils`
-- Create a symbolic link for `check_footprint.py` at `/usr/local/bin/check_footprint.py`
+- Create symbolic links for `check_footprint.py` and `check_symbol.py` at `/usr/local/bin/klc-footprint` and `/usr/local/bin/klc-symbol`
 
 ## `setup-zephyr-sdk`
 

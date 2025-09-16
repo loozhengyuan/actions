@@ -29,9 +29,10 @@ jobs:
           # Check if the directory exists
           ls -la /opt/kicad-library-utils
 
-          # Check if the symbolic link exists
-          ls -la /usr/local/bin/check_footprint.py
+          # Check if the symbolic links exist
+          ls -la /usr/local/bin/klc-footprint
+          ls -la /usr/local/bin/klc-symbol
 
-          # Test if the script is executable
-          python3 /usr/local/bin/check_footprint.py --help || \
-            echo "Script exists but may need additional dependencies"
+          # Test if the scripts are executable
+          klc-footprint --help
+          klc-symbol --help
