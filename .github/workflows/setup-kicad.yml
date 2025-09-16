@@ -8,38 +8,18 @@ on:
       - main
 
 jobs:
-  test-exact-version:
+  test-source-build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version:
-          - "8.0.6"
-          - "8.0.5"
+    timeout-minutes: 120  # Building from source takes time
 
     steps:
       - name: Checkout branch
         uses: actions/checkout@v5.0.0
 
-      - name: Run action with exact version
+      - name: Run action with specific version
         uses: ./setup-kicad
         with:
-          version: ${{ matrix.version }}
-
-      - name: Verify KiCad installation
-        run: |
-          kicad-cli --version
-          which kicad
-          which kicad-cli
-
-  test-ppa-fallback:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v5.0.0
-
-      - name: Run action without version (PPA fallback)
-        uses: ./setup-kicad
+          version: "8.0.6"
 
       - name: Verify KiCad installation
         run: |

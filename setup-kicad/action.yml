@@ -1,27 +1,68 @@
 name: Set up KiCad
 description: |
-  Installs KiCad to the runner environment with support for exact versions.
-  Supports installing specific versions (e.g., 8.0.6) via AppImage downloads.
+  Installs KiCad to the runner environment by building from source.
 
   For more information, see: https://www.kicad.org
 
 inputs:
   version:
-    description: Release version of KiCad to be installed (e.g., 8.0.6, 8.0.5). If not specified, installs latest from PPA.
-    required: false
+    description: Release version of KiCad to be installed (e.g., 8.0.6, 8.0.5)
+    required: true
 
 runs:
   using: "composite"
 
   steps:
-    - name: Install exact KiCad version via AppImage
-      if: ${{ inputs.version }}
+    - name: Install build dependencies
+      shell: bash
+      run: |
+        set -e
+        echo "Installing KiCad build dependencies..."
+        
+        # Update package list
+        sudo apt-get update
+        
+        # Install essential build tools
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          git \
+          ninja-build \
+          pkg-config \
+          python3 \
+          python3-dev \
+          python3-wxgtk4.0 \
+          python3-pip
+        
+        # Install KiCad-specific dependencies
+        sudo apt-get install -y \
+          libboost-all-dev \
+          libcairo2-dev \
+          libcurl4-openssl-dev \
+          libgl1-mesa-dev \
+          libglew-dev \
+          libglm-dev \
+          libgtk-3-dev \
+          libngspice0-dev \
+          liboce-foundation-dev \
+          liboce-ocaf-dev \
+          libocct-data-exchange-dev \
+          libocct-ocaf-dev \
+          libopencascade-dev \
+          libssl-dev \
+          libwxgtk3.2-dev \
+          libzip-dev \
+          swig4.0 \
+          uuid-dev \
+          zlib1g-dev
+
+    - name: Download KiCad source
       shell: bash
       run: |
         set -e
         
         VERSION="${{ inputs.version }}"
-        echo "Installing KiCad version: $VERSION"
+        echo "Downloading KiCad source version: $VERSION"
         
         # Validate version format (x.y.z)
         if ! echo "$VERSION" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'; then
@@ -29,90 +70,93 @@ runs:
           exit 1
         fi
         
-        # Create installation directory
-        INSTALL_DIR="/opt/kicad-$VERSION"
-        sudo mkdir -p "$INSTALL_DIR"
+        # Create build directory
+        BUILD_DIR="/tmp/kicad-build"
+        mkdir -p "$BUILD_DIR"
+        cd "$BUILD_DIR"
         
-        # Download AppImage
-        APPIMAGE_URL="https://downloads.kicad.org/kicad/${VERSION}/kicad-${VERSION}-x86_64.AppImage"
-        APPIMAGE_PATH="$INSTALL_DIR/kicad-${VERSION}.AppImage"
+        # Download source tarball
+        SOURCE_URL="https://gitlab.com/kicad/code/kicad/-/archive/${VERSION}/kicad-${VERSION}.tar.gz"
+        echo "Downloading from: $SOURCE_URL"
         
-        echo "Downloading KiCad AppImage from: $APPIMAGE_URL"
-        
-        # Download with retry logic
         for attempt in 1 2 3; do
-          if curl -L --fail -o "$APPIMAGE_PATH" "$APPIMAGE_URL"; then
+          if curl -L --fail -o "kicad-${VERSION}.tar.gz" "$SOURCE_URL"; then
             echo "✓ Download successful on attempt $attempt"
             break
           else
             echo "Download attempt $attempt failed"
             if [ $attempt -eq 3 ]; then
-              echo "Error: Failed to download KiCad AppImage after 3 attempts"
-              echo "Please check if version $VERSION exists at: $APPIMAGE_URL"
+              echo "Error: Failed to download KiCad source after 3 attempts"
               exit 1
             fi
             sleep 2
           fi
         done
         
-        # Verify download
-        if [ ! -f "$APPIMAGE_PATH" ] || [ ! -s "$APPIMAGE_PATH" ]; then
-          echo "Error: AppImage file is missing or empty"
-          exit 1
-        fi
+        # Extract source
+        tar -xzf "kicad-${VERSION}.tar.gz"
+        mv "kicad-${VERSION}" kicad-source
         
-        # Make AppImage executable
-        chmod +x "$APPIMAGE_PATH"
+        echo "✓ KiCad source downloaded and extracted"
+
+    - name: Build KiCad from source
+      shell: bash
+      run: |
+        set -e
         
-        # Create symlinks for KiCad binaries
-        sudo mkdir -p /usr/local/bin
+        VERSION="${{ inputs.version }}"
+        BUILD_DIR="/tmp/kicad-build"
+        SOURCE_DIR="$BUILD_DIR/kicad-source"
         
-        # Extract AppImage to access binaries
-        cd "$INSTALL_DIR"
-        "./$APPIMAGE_PATH" --appimage-extract > /dev/null 2>&1 || {
-          echo "Error: Failed to extract AppImage"
-          exit 1
-        }
+        cd "$SOURCE_DIR"
         
-        # Create symlinks for common KiCad executables
-        EXTRACTED_DIR="$INSTALL_DIR/squashfs-root"
-        if [ ! -d "$EXTRACTED_DIR/usr/bin" ]; then
-          echo "Error: Extracted AppImage structure is unexpected"
-          exit 1
-        fi
+        # Create build directory
+        mkdir -p build
+        cd build
         
-        for binary in kicad kicad-cli eeschema pcbnew; do
-          if [ -f "$EXTRACTED_DIR/usr/bin/$binary" ]; then
-            sudo ln -sf "$EXTRACTED_DIR/usr/bin/$binary" "/usr/local/bin/$binary"
-            echo "✓ Created symlink for $binary"
-          else
-            echo "Warning: Binary $binary not found in AppImage"
-          fi
-        done
+        echo "Configuring KiCad build..."
+        
+        # Configure with CMake
+        cmake \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=/usr/local \
+          -DKICAD_SCRIPTING_WXPYTHON=ON \
+          -DKICAD_USE_OCC=ON \
+          -DKICAD_SPICE=ON \
+          ..
+        
+        echo "Building KiCad (this may take 30-60 minutes)..."
+        
+        # Build with ninja (faster than make)
+        ninja -j$(nproc)
+        
+        echo "✓ KiCad build completed"
+
+    - name: Install KiCad
+      shell: bash
+      run: |
+        set -e
+        
+        BUILD_DIR="/tmp/kicad-build"
+        SOURCE_DIR="$BUILD_DIR/kicad-source"
+        
+        cd "$SOURCE_DIR/build"
+        
+        echo "Installing KiCad..."
+        sudo ninja install
+        
+        # Update library cache
+        sudo ldconfig
         
         # Verify installation
         if command -v kicad-cli >/dev/null 2>&1; then
           kicad-cli --version
-          echo "✓ KiCad $VERSION installed successfully via AppImage"
+          echo "✓ KiCad ${{ inputs.version }} installed successfully from source"
         else
           echo "Error: kicad-cli not accessible after installation"
           exit 1
         fi
-
-    - name: Install KiCad from PPA (fallback)
-      if: ${{ !inputs.version }}
-      shell: bash
-      run: |
-        set -e
-        echo "No specific version requested, installing latest from PPA"
-        
-        # Add KiCad PPA
-        sudo add-apt-repository ppa:kicad/kicad-8.0-releases -y
-        sudo apt-get update
-        
-        # Install latest version
-        sudo apt-get install -y kicad
-        kicad-cli --version
 
     - name: Set up KiCad configuration directories
       shell: bash
@@ -132,23 +176,11 @@ runs:
         echo "Setting up KiCad configuration in: $CONFIG_DIR"
         mkdir -p "$CONFIG_DIR"
         
-        # Find library table templates
-        TEMPLATE_DIRS=(
-          "/usr/share/kicad/template"
-          "/opt/kicad-${{ inputs.version }}/squashfs-root/usr/share/kicad/template"
-        )
-        
-        LIB_TABLES_COPIED=false
-        for template_dir in "${TEMPLATE_DIRS[@]}"; do
-          if [ -d "$template_dir" ] && [ "$(ls -A "$template_dir"/*-lib-table 2>/dev/null | wc -l)" -gt 0 ]; then
-            echo "Found library tables in: $template_dir"
-            cp "$template_dir"/*-lib-table "$CONFIG_DIR/" 2>/dev/null || true
-            LIB_TABLES_COPIED=true
-            break
-          fi
-        done
-        
-        if [ "$LIB_TABLES_COPIED" = true ]; then
+        # Copy library tables from installation
+        TEMPLATE_DIR="/usr/local/share/kicad/template"
+        if [ -d "$TEMPLATE_DIR" ] && [ "$(ls -A "$TEMPLATE_DIR"/*-lib-table 2>/dev/null | wc -l)" -gt 0 ]; then
+          echo "Found library tables in: $TEMPLATE_DIR"
+          cp "$TEMPLATE_DIR"/*-lib-table "$CONFIG_DIR/" 2>/dev/null || true
           echo "✓ Library tables copied successfully"
         else
           echo "Warning: No library tables found to copy"
@@ -161,3 +193,13 @@ runs:
         fi
         
         echo "✓ KiCad configuration setup completed"
+
+    - name: Clean up build files
+      shell: bash
+      run: |
+        set -e
+        
+        echo "Cleaning up build files..."
+        rm -rf /tmp/kicad-build
+        
+        echo "✓ Build cleanup completed"
