@@ -28,9 +28,10 @@ jobs:
         run: |
           # Check if the directory exists
           ls -la /opt/kicad-library-utils
-          
+
           # Check if the symbolic link exists
           ls -la /usr/local/bin/check_footprint.py
-          
+
           # Test if the script is executable
-          python3 /usr/local/bin/check_footprint.py --help || echo "Script exists but may need additional dependencies"
+          python3 /usr/local/bin/check_footprint.py --help || \
+            echo "Script exists but may need additional dependencies"
