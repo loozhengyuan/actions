@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  test:
+  test-default:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -20,19 +20,33 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v5.0.0
 
-      - name: Run action
+      - name: Run action (default version)
         uses: ./setup-kicad-library-utils
 
       - name: Verify installation
         shell: bash
         run: |
-          # Check if the directory exists
-          ls -la /opt/kicad-library-utils
+          klc-footprint --help
+          klc-symbol --help
 
-          # Check if the symbolic links exist
-          ls -la /usr/local/bin/klc-footprint
-          ls -la /usr/local/bin/klc-symbol
+  test-version:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
 
-          # Test if the scripts are executable
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v5.0.0
+
+      - name: Run action (with v8 version)
+        uses: ./setup-kicad-library-utils
+        with:
+          version: v8
+
+      - name: Verify installation
+        shell: bash
+        run: |
           klc-footprint --help
           klc-symbol --help

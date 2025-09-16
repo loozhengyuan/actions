@@ -27,12 +27,11 @@ runs:
     - name: Create symbolic links
       shell: bash
       run: |
-        sudo ln -sf \
+        ln -sf \
           /opt/kicad-library-utils/klc-check/check_footprint.py \
           /usr/local/bin/klc-footprint
-        sudo ln -sf \
+        ln -sf \
           /opt/kicad-library-utils/klc-check/check_symbol.py \
           /usr/local/bin/klc-symbol
-        sudo chmod +x /usr/local/bin/klc-footprint
-        sudo chmod +x /usr/local/bin/klc-symbol
         klc-footprint --help
+        klc-symbol --help
