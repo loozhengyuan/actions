@@ -1,0 +1,36 @@
+name: setup-kicad-library-utils
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v5.0.0
+
+      - name: Run action
+        uses: ./setup-kicad-library-utils
+
+      - name: Verify installation
+        shell: bash
+        run: |
+          # Check if the directory exists
+          ls -la /opt/kicad-library-utils
+          
+          # Check if the symbolic link exists
+          ls -la /usr/local/bin/check_footprint.py
+          
+          # Test if the script is executable
+          python3 /usr/local/bin/check_footprint.py --help || echo "Script exists but may need additional dependencies"

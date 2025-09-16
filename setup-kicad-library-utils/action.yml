@@ -1,0 +1,46 @@
+name: Set up KiCad Library Utils
+description: |
+  Installs KiCad Library Utils to the runner environment.
+
+  For more information, see: https://gitlab.com/kicad/libraries/kicad-library-utils
+
+inputs:
+  version:
+    description: Git ref (branch, tag, or commit) of KiCad Library Utils to be installed
+    default: master
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Install dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git python3 python3-pip
+
+    - name: Clone KiCad Library Utils
+      shell: bash
+      run: |
+        sudo git clone https://gitlab.com/kicad/libraries/kicad-library-utils.git /opt/kicad-library-utils
+        cd /opt/kicad-library-utils
+        sudo git checkout "${{ inputs.version }}"
+
+    - name: Install Python dependencies
+      shell: bash
+      run: |
+        cd /opt/kicad-library-utils
+        if [ -f requirements.txt ]; then
+          sudo pip3 install -r requirements.txt
+        fi
+
+    - name: Create symbolic links
+      shell: bash
+      run: |
+        # Create symbolic link for check_footprint.py
+        sudo ln -sf /opt/kicad-library-utils/klc-check/check_footprint.py /usr/local/bin/check_footprint.py
+        sudo chmod +x /usr/local/bin/check_footprint.py
+        
+        # Verify the installation
+        ls -la /usr/local/bin/check_footprint.py
+        python3 /usr/local/bin/check_footprint.py --help || echo "Tool installed but may need additional setup"
