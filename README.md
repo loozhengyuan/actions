@@ -7,18 +7,35 @@ Monorepo of composite actions and reusable workflows.
 
 ## `setup-kicad`
 
-Installs [KiCad](https://www.kicad.org) to the runner environment.
+Installs [KiCad](https://www.kicad.org) to the runner environment by building from source.
 
 ### Usage
-
-> [!NOTE]
-> At present, only the latest KiCad version and Ubuntu runners are supported.
 
 ```yaml
 steps:
   - name: Set up KiCad
     uses: loozhengyuan/actions/setup-kicad
+    with:
+      version: "8.0.6"
 ```
+
+### Requirements
+
+- Linux runners (Ubuntu)
+- Sufficient disk space and memory for building (recommended: at least 4GB RAM, 10GB disk space)
+- Build time: approximately 30-60 minutes depending on runner specifications
+
+### Supported Versions
+
+Specify any released version in `x.y.z` format (e.g., `8.0.6`, `8.0.5`, `7.0.11`). The action will:
+
+- Download the source code from the official KiCad GitLab repository
+- Install all necessary build dependencies 
+- Compile KiCad from source with optimized settings
+- Install to `/usr/local` with proper configuration
+
+> [!NOTE]
+> Building from source ensures you get the exact version requested and provides the most flexible installation approach. The process includes all necessary dependencies and optimizations for the target environment.
 
 ## `setup-zephyr-sdk`
 

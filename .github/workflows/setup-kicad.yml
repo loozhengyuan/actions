@@ -8,16 +8,21 @@ on:
       - main
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
+  test-source-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120  # Building from source takes time
 
     steps:
       - name: Checkout branch
         uses: actions/checkout@v5.0.0
 
-      - name: Run action
+      - name: Run action with specific version
         uses: ./setup-kicad
+        with:
+          version: "8.0.6"
+
+      - name: Verify KiCad installation
+        run: |
+          kicad-cli --version
+          which kicad
+          which kicad-cli
