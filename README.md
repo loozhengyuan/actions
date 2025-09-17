@@ -23,7 +23,7 @@ steps:
 
 ## `setup-kicad-library-utils`
 
-Installs [KiCad Library Utils](https://gitlab.com/kicad/libraries/kicad-library-utils) to the runner environment. Use by KiCad libraries to check symbols/footprints in CI environment.
+Installs [KiCad Library Utils](https://gitlab.com/kicad/libraries/kicad-library-utils) to the runner environment. Used by KiCad libraries to check symbols/footprints in CI environment.
 
 ### Usage
 
