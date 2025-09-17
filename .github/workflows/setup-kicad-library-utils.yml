@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  test-default:
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -20,7 +20,7 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v5.0.0
 
-      - name: Run action (default version)
+      - name: Run action
         uses: ./setup-kicad-library-utils
 
       - name: Verify installation
@@ -40,10 +40,10 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v5.0.0
 
-      - name: Run action (with v8 version)
+      - name: Run action
         uses: ./setup-kicad-library-utils
         with:
-          version: v8
+          version: "v8"
 
       - name: Verify installation
         shell: bash

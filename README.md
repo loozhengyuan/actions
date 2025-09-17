@@ -23,12 +23,9 @@ steps:
 
 ## `setup-kicad-library-utils`
 
-Installs [KiCad Library Utils](https://gitlab.com/kicad/libraries/kicad-library-utils) to the runner environment.
+Installs [KiCad Library Utils](https://gitlab.com/kicad/libraries/kicad-library-utils) to the runner environment. Use by KiCad libraries to check symbols/footprints in CI environment.
 
 ### Usage
-
-> [!NOTE]
-> At present, only Ubuntu runners are supported.
 
 ```yaml
 steps:
@@ -45,10 +42,6 @@ steps:
     with:
       version: "v1.0.0"
 ```
-
-The action will:
-- Clone the KiCad Library Utils repository to `/opt/kicad-library-utils`
-- Create symbolic links for `check_footprint.py` and `check_symbol.py` at `/usr/local/bin/klc-footprint` and `/usr/local/bin/klc-symbol`
 
 ## `setup-zephyr-sdk`
 
