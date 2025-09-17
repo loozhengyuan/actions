@@ -1,0 +1,37 @@
+name: Set up KiCad Library Utils
+description: |
+  Installs KiCad Library Utils to the runner environment.
+
+  For more information, see:
+  https://gitlab.com/kicad/libraries/kicad-library-utils
+
+inputs:
+  version:
+    description: |
+      Git ref (branch, tag, or commit) of KiCad Library Utils to be installed
+    default: master
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Clone KiCad Library Utils
+      shell: bash
+      run: |
+        git clone \
+          --branch "${{ inputs.version }}" \
+          --depth 1 \
+          https://gitlab.com/kicad/libraries/kicad-library-utils.git \
+          /opt/kicad-library-utils
+
+    - name: Create symbolic links
+      shell: bash
+      run: |
+        ln -sf \
+          /opt/kicad-library-utils/klc-check/check_footprint.py \
+          /usr/local/bin/klc-footprint
+        ln -sf \
+          /opt/kicad-library-utils/klc-check/check_symbol.py \
+          /usr/local/bin/klc-symbol
+        klc-footprint --help
+        klc-symbol --help

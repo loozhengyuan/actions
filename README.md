@@ -1,6 +1,7 @@
 # `actions`
 
 [![setup-kicad](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad.yml)
+[![setup-kicad-library-utils](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad-library-utils.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad-library-utils.yml)
 [![setup-zephyr-sdk](https://github.com/loozhengyuan/actions/actions/workflows/setup-zephyr-sdk.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-zephyr-sdk.yml)
 
 Monorepo of composite actions and reusable workflows.
@@ -18,6 +19,28 @@ Installs [KiCad](https://www.kicad.org) to the runner environment.
 steps:
   - name: Set up KiCad
     uses: loozhengyuan/actions/setup-kicad
+```
+
+## `setup-kicad-library-utils`
+
+Installs [KiCad Library Utils](https://gitlab.com/kicad/libraries/kicad-library-utils) to the runner environment. Used by KiCad libraries to check symbols/footprints in CI environment.
+
+### Usage
+
+```yaml
+steps:
+  - name: Set up KiCad Library Utils
+    uses: loozhengyuan/actions/setup-kicad-library-utils
+```
+
+By default, the `master` branch will be installed. You can specify a different version (branch, tag, or commit) using the `version` input:
+
+```yaml
+steps:
+  - name: Set up KiCad Library Utils
+    uses: loozhengyuan/actions/setup-kicad-library-utils
+    with:
+      version: "v1.0.0"
 ```
 
 ## `setup-zephyr-sdk`
