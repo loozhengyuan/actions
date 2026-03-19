@@ -1,0 +1,31 @@
+name: setup-hugo
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action
+        uses: ./setup-hugo
+        with:
+          version: "0.158.0"
+
+      - name: Verify installation
+        shell: bash
+        run: |
+          hugo version

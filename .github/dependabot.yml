@@ -8,6 +8,7 @@ updates:
       # work so they have to be defined explicitly.
       # https://github.com/dependabot/dependabot-core/issues/6704
       - "/setup-kicad"
+      - "/setup-hugo"
       - "/setup-zephyr-sdk"
     schedule:
       interval: "weekly"
