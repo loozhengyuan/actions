@@ -1,0 +1,35 @@
+name: Set up Hugo
+description: |
+  Installs Hugo to runner environment.
+
+  For more information, see: https://github.com/gohugoio/hugo/releases/latest
+
+inputs:
+  # TODO: Support latest? Need to dynamically derive latest version to work
+  version:
+    description: Release version of Hugo
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Download Hugo
+      shell: bash
+      run: |
+        mkdir -p "/opt/hugo/v${{ inputs.version }}"
+        curl -fsSLO "https://github.com/gohugoio/hugo/releases/download/v${{ inputs.version }}/hugo_${{ inputs.version }}_linux-amd64.tar.gz"
+        curl -fsSLO "https://github.com/gohugoio/hugo/releases/download/v${{ inputs.version }}/hugo_${{ inputs.version }}_checksums.txt"
+        sha256sum --check --ignore-missing < hugo_${{ inputs.version }}_checksums.txt
+        tar xvf "hugo_${{ inputs.version }}_linux-amd64.tar.gz"
+        mv "hugo" "/opt/hugo/v${{ inputs.version }}/hugo"
+        rm "hugo_${{ inputs.version }}_linux-amd64.tar.gz"
+        rm "hugo_${{ inputs.version }}_checksums.txt"
+        rm "README.md"
+        rm "LICENSE"
+
+    - name: Install Hugo
+      shell: bash
+      run: |
+        ln -sf "/opt/hugo/v${{ inputs.version }}/hugo" /usr/local/bin/hugo
+        hugo version
