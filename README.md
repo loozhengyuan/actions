@@ -73,17 +73,17 @@ steps:
   - name: Set up Zephyr SDK
     uses: loozhengyuan/actions/setup-zephyr-sdk
     with:
-      version: "0.16.5-1"
+      version: "1.0.1"
 ```
 
-By default, all toolchains will be installed. You can use `toolchains` command to specify a list of toolchains to be used:
+By default, all toolchains will be installed. You can use the `toolchains` input to specify a list of toolchains to be installed:
 
 ```yaml
 steps:
   - name: Set up Zephyr SDK
     uses: loozhengyuan/actions/setup-zephyr-sdk
     with:
-      version: "0.16.5-1"
+      version: "1.0.1"
       toolchains: arm-zephyr-eabi
 ```
 
