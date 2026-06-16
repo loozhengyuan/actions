@@ -7,8 +7,9 @@ updates:
       # are not bumped automatically. Glob expression DOES NOT
       # work so they have to be defined explicitly.
       # https://github.com/dependabot/dependabot-core/issues/6704
-      - "/setup-kicad"
       - "/setup-hugo"
+      - "/setup-kicad"
+      - "/setup-kicad-libary-utils"
       - "/setup-zephyr-sdk"
     schedule:
       interval: "weekly"
