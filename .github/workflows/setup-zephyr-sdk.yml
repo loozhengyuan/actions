@@ -23,5 +23,10 @@ jobs:
       - name: Run action
         uses: ./setup-zephyr-sdk
         with:
-          version: "0.16.5-1"
+          version: "1.0.1"
           toolchains: arm-zephyr-eabi
+
+      - name: Verify installation
+        shell: bash
+        run: |
+          "${ZEPHYR_SDK_INSTALL_DIR}/gnu/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc" --version

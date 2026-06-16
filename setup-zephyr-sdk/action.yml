@@ -26,23 +26,27 @@ runs:
         # TODO: Hash toolchains probably?
         key: zephyr-sdk-${{ runner.os }}-${{ inputs.version }}-${{ inputs.toolchains }}
         path: |
-          ~/zephyr-sdk-${{ inputs.version }}
-          ~/.cmake/packages/Zephyr-sdk
+          /opt/zephyr-sdk/v${{ inputs.version }}
 
     - name: Download Zephyr SDK
       if: ${{ steps.cache-zephyr-sdk.outputs.cache-hit != 'true' }}
       shell: bash
       run: |
-        curl -fsSLO "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${{ inputs.version }}/zephyr-sdk-${{ inputs.version }}_linux-x86_64.tar.xz"
+        mkdir -p "/opt/zephyr-sdk/v${{ inputs.version }}"
+        curl -fsSLO "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${{ inputs.version }}/zephyr-sdk-${{ inputs.version }}_linux-x86_64_minimal.tar.xz"
         curl -fsSLO "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${{ inputs.version }}/sha256.sum"
         sha256sum --check --ignore-missing < sha256.sum
-        tar xvf "zephyr-sdk-${{ inputs.version }}_linux-x86_64.tar.xz"
-        mv "zephyr-sdk-${{ inputs.version }}" "${HOME}"
-        rm "zephyr-sdk-${{ inputs.version }}_linux-x86_64.tar.xz"
+        tar -C "/opt/zephyr-sdk/v${{ inputs.version }}" --strip-components=1 -xf "zephyr-sdk-${{ inputs.version }}_linux-x86_64_minimal.tar.xz"
+        rm "zephyr-sdk-${{ inputs.version }}_linux-x86_64_minimal.tar.xz"
         rm sha256.sum
 
-    - name: Install Zephyr SDK
+    - name: Install Zephyr Toolchains
       if: ${{ steps.cache-zephyr-sdk.outputs.cache-hit != 'true' }}
       shell: bash
       run: |
-        "${HOME}/zephyr-sdk-${{ inputs.version }}/setup.sh" -t "${{ inputs.toolchains }}"
+        "/opt/zephyr-sdk/v${{ inputs.version }}/setup.sh" -t "${{ inputs.toolchains }}"
+
+    - name: Export Zephyr SDK install directory
+      shell: bash
+      run: |
+        echo "ZEPHYR_SDK_INSTALL_DIR=/opt/zephyr-sdk/v${{ inputs.version }}" >> "${GITHUB_ENV}"
