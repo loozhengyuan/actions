@@ -9,7 +9,7 @@ updates:
       # https://github.com/dependabot/dependabot-core/issues/6704
       - "/setup-hugo"
       - "/setup-kicad"
-      - "/setup-kicad-libary-utils"
+      - "/setup-kicad-library-utils"
       - "/setup-zephyr-sdk"
     schedule:
       interval: "weekly"
