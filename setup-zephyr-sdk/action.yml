@@ -27,6 +27,7 @@ runs:
         key: zephyr-sdk-${{ runner.os }}-${{ inputs.version }}-${{ inputs.toolchains }}
         path: |
           /opt/zephyr-sdk/v${{ inputs.version }}
+          ~/.cmake/packages/Zephyr-sdk
 
     - name: Download Zephyr SDK
       if: ${{ steps.cache-zephyr-sdk.outputs.cache-hit != 'true' }}
@@ -44,7 +45,7 @@ runs:
       if: ${{ steps.cache-zephyr-sdk.outputs.cache-hit != 'true' }}
       shell: bash
       run: |
-        "/opt/zephyr-sdk/v${{ inputs.version }}/setup.sh" -t "${{ inputs.toolchains }}"
+        "/opt/zephyr-sdk/v${{ inputs.version }}/setup.sh" -c -t "${{ inputs.toolchains }}"
 
     - name: Export Zephyr SDK install directory
       shell: bash
