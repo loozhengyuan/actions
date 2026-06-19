@@ -1,5 +1,6 @@
 # `actions`
 
+[![setup-gn](https://github.com/loozhengyuan/actions/actions/workflows/setup-gn.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-gn.yml)
 [![setup-kicad](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad.yml)
 [![setup-kicad-library-utils](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad-library-utils.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad-library-utils.yml)
 [![setup-hugo](https://github.com/loozhengyuan/actions/actions/workflows/setup-hugo.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-hugo.yml)
@@ -86,6 +87,34 @@ steps:
       version: "1.0.1"
       toolchains: arm-zephyr-eabi
 ```
+
+## `setup-gn`
+
+Installs [GN](https://gn.googlesource.com/gn) in runner environment. GN is distributed via [CIPD](https://chrome-infra-packages.appspot.com/p/gn/gn), so it does not follow semantic versioning.
+
+### Usage
+
+```yaml
+steps:
+  - name: Set up GN
+    uses: loozhengyuan/actions/setup-gn
+```
+
+By default, the `latest` version will be installed.
+
+## `setup-nrfutil`
+
+Installs [nrfutil](https://docs.nordicsemi.com/bundle/nrfutil/page/README.html) in runner environment.
+
+### Usage
+
+```yaml
+steps:
+  - name: Set up nrfutil
+    uses: loozhengyuan/actions/setup-nrfutil
+```
+
+The `latest` version will be installed.
 
 ## License
 
