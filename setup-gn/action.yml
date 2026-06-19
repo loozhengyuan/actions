@@ -1,0 +1,33 @@
+name: Set up GN
+description: |
+  Installs GN to the runner environment.
+
+  For more information, see: https://gn.googlesource.com/gn
+
+inputs:
+  # NOTE: GN is distributed via CIPD, which does not use semantic
+  # versioning. The version maps to a CIPD version (e.g. `latest`).
+  version:
+    description: CIPD version of GN to be installed
+    default: latest
+
+runs:
+  using: "composite"
+
+  steps:
+    # TODO: Support other distros and OS?
+    # TODO: Verify package integrity against the CIPD instance hash
+    - name: Download GN
+      shell: bash
+      run: |
+        mkdir -p "/opt/gn/${{ inputs.version }}"
+        curl -fsSL -o gn.zip "https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/${{ inputs.version }}"
+        unzip -o gn.zip -d "/opt/gn/${{ inputs.version }}"
+        rm gn.zip
+
+    - name: Install GN
+      shell: bash
+      run: |
+        chmod +x "/opt/gn/${{ inputs.version }}/gn"
+        ln -sf "/opt/gn/${{ inputs.version }}/gn" /usr/local/bin/gn
+        gn --version
