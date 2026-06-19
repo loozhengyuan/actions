@@ -1,0 +1,25 @@
+name: Set up nrfutil
+description: |
+  Installs nrfutil to the runner environment.
+
+  For more information, see: https://docs.nordicsemi.com/bundle/nrfutil/page/README.html
+
+runs:
+  using: "composite"
+
+  steps:
+    # TODO: Support other distros and OS?
+    # TODO: Support pinning to a specific version
+    # TODO: Verify package integrity
+    - name: Download nrfutil
+      shell: bash
+      run: |
+        mkdir -p /opt/nrfutil/latest
+        curl -fsSL -o /opt/nrfutil/latest/nrfutil "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil"
+
+    - name: Install nrfutil
+      shell: bash
+      run: |
+        chmod +x /opt/nrfutil/latest/nrfutil
+        ln -sf /opt/nrfutil/latest/nrfutil /usr/local/bin/nrfutil
+        nrfutil --version

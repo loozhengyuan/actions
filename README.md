@@ -3,6 +3,7 @@
 [![setup-kicad](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad.yml)
 [![setup-kicad-library-utils](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad-library-utils.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad-library-utils.yml)
 [![setup-hugo](https://github.com/loozhengyuan/actions/actions/workflows/setup-hugo.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-hugo.yml)
+[![setup-nrfutil](https://github.com/loozhengyuan/actions/actions/workflows/setup-nrfutil.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-nrfutil.yml)
 [![setup-zephyr-sdk](https://github.com/loozhengyuan/actions/actions/workflows/setup-zephyr-sdk.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-zephyr-sdk.yml)
 
 Monorepo of composite actions and reusable workflows.
