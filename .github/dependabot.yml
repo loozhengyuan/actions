@@ -11,6 +11,7 @@ updates:
       - "/setup-hugo"
       - "/setup-kicad"
       - "/setup-kicad-library-utils"
+      - "/setup-nrf-connect-sdk"
       - "/setup-nrfutil"
       - "/setup-zephyr-sdk"
     schedule:
