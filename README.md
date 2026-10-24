@@ -2,6 +2,7 @@
 
 [![setup-gn](https://github.com/loozhengyuan/actions/actions/workflows/setup-gn.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-gn.yml)
 [![setup-kicad](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad.yml)
+[![setup-kicad-library-tools](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad-library-tools.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad-library-tools.yml)
 [![setup-kicad-library-utils](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad-library-utils.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-kicad-library-utils.yml)
 [![setup-hugo](https://github.com/loozhengyuan/actions/actions/workflows/setup-hugo.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-hugo.yml)
 [![setup-nrf-connect-sdk](https://github.com/loozhengyuan/actions/actions/workflows/setup-nrf-connect-sdk.yml/badge.svg)](https://github.com/loozhengyuan/actions/actions/workflows/setup-nrf-connect-sdk.yml)
@@ -25,7 +26,34 @@ steps:
     uses: loozhengyuan/actions/setup-kicad
 ```
 
+## `setup-kicad-library-tools`
+
+Installs [KiCad Library Tools](https://gitlab.com/kicad/libraries/kicad-library-tools) to the runner environment. Used by KiCad libraries to check symbols/footprints in CI environment. The `klc-footprint` and `klc-symbol` commands are added to `PATH`.
+
+Only the `library_utils/` directory is checked out (sparse checkout), since the full repository is significantly larger.
+
+### Usage
+
+```yaml
+steps:
+  - name: Set up KiCad Library Tools
+    uses: loozhengyuan/actions/setup-kicad-library-tools
+```
+
+By default, the `main` branch will be installed. You can specify a different version (branch, tag, or commit) using the `version` input:
+
+```yaml
+steps:
+  - name: Set up KiCad Library Tools
+    uses: loozhengyuan/actions/setup-kicad-library-tools
+    with:
+      version: "36d1ed208379d7c4127661ac384118cc6837392b"
+```
+
 ## `setup-kicad-library-utils`
+
+> [!WARNING]
+> **Deprecated:** Upstream has archived [KiCad Library Utils](https://gitlab.com/kicad/libraries/kicad-library-utils) and moved the KLC checkers to [KiCad Library Tools](https://gitlab.com/kicad/libraries/kicad-library-tools). Use [`setup-kicad-library-tools`](#setup-kicad-library-tools) instead. This action is kept for backwards compatibility.
 
 Installs [KiCad Library Utils](https://gitlab.com/kicad/libraries/kicad-library-utils) to the runner environment. Used by KiCad libraries to check symbols/footprints in CI environment.
 
