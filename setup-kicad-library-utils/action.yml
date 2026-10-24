@@ -2,6 +2,9 @@ name: Set up KiCad Library Utils
 description: |
   Installs KiCad Library Utils to the runner environment.
 
+  DEPRECATED: Upstream has archived KiCad Library Utils in favour of
+  KiCad Library Tools. Use `setup-kicad-library-tools` instead.
+
   For more information, see:
   https://gitlab.com/kicad/libraries/kicad-library-utils
 

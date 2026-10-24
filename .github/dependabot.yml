@@ -10,6 +10,7 @@ updates:
       - "/setup-gn"
       - "/setup-hugo"
       - "/setup-kicad"
+      - "/setup-kicad-library-tools"
       - "/setup-kicad-library-utils"
       - "/setup-nrf-connect-sdk"
       - "/setup-nrfutil"

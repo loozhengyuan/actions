@@ -1,0 +1,41 @@
+name: Set up KiCad Library Tools
+description: |
+  Installs KiCad Library Tools to the runner environment.
+
+  Only the `library_utils/` directory is checked out, which
+  contains the KLC checkers used by KiCad libraries in CI.
+
+  For more information, see:
+  https://gitlab.com/kicad/libraries/kicad-library-tools
+
+inputs:
+  version:
+    description: |
+      Git ref (branch, tag, or commit) of KiCad Library Tools to be installed
+    default: main
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Clone KiCad Library Tools
+      shell: bash
+      run: |
+        git init /opt/kicad-library-tools
+        cd /opt/kicad-library-tools
+        git remote add origin https://gitlab.com/kicad/libraries/kicad-library-tools.git
+        git sparse-checkout set library_utils
+        git fetch --depth 1 --filter=blob:none origin "${{ inputs.version }}"
+        git checkout FETCH_HEAD
+
+    - name: Create symbolic links
+      shell: bash
+      run: |
+        ln -sf \
+          /opt/kicad-library-tools/library_utils/klc-check/check_footprint.py \
+          /usr/local/bin/klc-footprint
+        ln -sf \
+          /opt/kicad-library-tools/library_utils/klc-check/check_symbol.py \
+          /usr/local/bin/klc-symbol
+        klc-footprint --help
+        klc-symbol --help
